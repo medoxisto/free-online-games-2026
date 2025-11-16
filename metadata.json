@@ -1,5 +1,5 @@
 {
-  "description": "An online games arcade website that fetches and displays a variety of games.",
+  "description": "A curated collection of popular and indie web games, instantly playable.",
   "requestFramePermissions": [],
-  "name": "Online Games Arcade"
+  "name": "Game Hub"
 }
