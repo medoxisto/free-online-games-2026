@@ -59,7 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
         loader.style.display = 'flex';
 
         try {
-            const response = await fetch(`https://feeds.gamepix.com/v2/json?sid=${SID}&pagination=${GAMES_PER_PAGE}&page=${page}`);
+            const apiUrl = `https://feeds.gamepix.com/v2/json?sid=${SID}&pagination=${GAMES_PER_PAGE}&page=${page}`;
+            // Using a CORS proxy to bypass browser security restrictions (CORS policy)
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+
+            const response = await fetch(proxyUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
