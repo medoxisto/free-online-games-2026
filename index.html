@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Games Arcade</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1 class="logo">GAME HUB</h1>
+            <div class="search-container">
+                <input type="search" id="search-input" placeholder="Search for games..." aria-label="Search for games">
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="featured-section" class="featured-section" aria-labelledby="featured-title">
+            <h2 id="featured-title" class="section-title">Featured Games</h2>
+            <div id="featured-games-container" class="featured-games-scroller">
+                <!-- Featured games will be injected here by JavaScript -->
+            </div>
+        </section>
+
+        <section id="all-games-section" aria-labelledby="all-games-title">
+            <h2 id="all-games-title" class="section-title">All Games</h2>
+            <div id="games-container" class="games-grid" aria-live="polite">
+                <!-- Game cards will be injected here by JavaScript -->
+            </div>
+            <div id="no-results" class="no-results-message" style="display: none;">
+                <p>No games found matching your search.</p>
+            </div>
+        </section>
+
+        <div id="loader" class="loader-container" role="status" aria-label="Loading more games">
+            <div class="loader"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Game Hub. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
