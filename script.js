@@ -5,11 +5,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const noResultsMessage = document.getElementById('no-results');
 
+    // Ensure GAMES_DATA is loaded from games-data.js
+    if (typeof GAMES_DATA === 'undefined' || !GAMES_DATA) {
+        console.error('Game data not found! Make sure games-data.js is loaded correctly.');
+        loader.style.display = 'none';
+        gamesContainer.innerHTML = '<p style="color: #f44336; width: 100%; text-align: center;">Could not load game data. The site may be broken.</p>';
+        return;
+    }
+
     let currentPage = 1;
     let isLoading = false;
-    let allGamesLoaded = false;
     const GAMES_PER_PAGE = 12;
-    const SID = 'TU070';
+    const TOTAL_GAMES = GAMES_DATA.length;
 
     const createGameCard = (game, isFeatured = false) => {
         const card = document.createElement('a');
@@ -31,12 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderGames = (games) => {
-        if (!games || games.length === 0) {
-            allGamesLoaded = true;
-            loader.style.display = 'none';
-            return;
-        }
-        
         const fragment = document.createDocumentFragment();
         games.forEach(game => {
             fragment.appendChild(createGameCard(game));
@@ -46,51 +47,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderFeaturedGames = (games) => {
         const fragment = document.createDocumentFragment();
-        games.slice(0, 6).forEach(game => { // Show first 6 as featured
+        // Show up to 8 games as featured
+        games.slice(0, 8).forEach(game => { 
             fragment.appendChild(createGameCard(game, true));
         });
         featuredGamesContainer.appendChild(fragment);
     };
 
-    const fetchGames = async (page) => {
-        if (isLoading || allGamesLoaded) return;
+    const loadMoreGames = () => {
+        if (isLoading) return;
+        
+        const startIndex = (currentPage - 1) * GAMES_PER_PAGE;
+        if (startIndex >= TOTAL_GAMES) {
+            loader.style.display = 'none'; // All games loaded
+            return;
+        }
 
         isLoading = true;
         loader.style.display = 'flex';
 
-        try {
-            const apiUrl = `https://feeds.gamepix.com/v2/json?sid=${SID}&pagination=${GAMES_PER_PAGE}&page=${page}`;
-            // Using a CORS proxy to bypass browser security restrictions (CORS policy)
-            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+        // Simulate a short delay for a smoother loading experience
+        setTimeout(() => {
+            const endIndex = startIndex + GAMES_PER_PAGE;
+            const gamesToRender = GAMES_DATA.slice(startIndex, endIndex);
 
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            
-            if (data && data.data) {
-                if (page === 1) {
-                    renderFeaturedGames(data.data);
-                }
-                renderGames(data.data);
-                currentPage++;
-                if (data.data.length < GAMES_PER_PAGE) {
-                    allGamesLoaded = true;
-                    loader.style.display = 'none';
-                }
-            } else {
-                allGamesLoaded = true;
+            renderGames(gamesToRender);
+            currentPage++;
+            isLoading = false;
+
+            if (endIndex >= TOTAL_GAMES) {
                 loader.style.display = 'none';
             }
-        } catch (error) {
-            console.error("Failed to fetch games:", error);
-            gamesContainer.innerHTML += '<p style="color: #f44336; width: 100%; text-align: center;">Failed to load games. Please try again later.</p>';
-            loader.style.display = 'none';
-            allGamesLoaded = true; // Stop trying on error
-        } finally {
-            isLoading = false;
-        }
+        }, 300);
     };
     
     const handleSearch = () => {
@@ -107,13 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         noResultsMessage.style.display = visibleCount === 0 && searchTerm !== '' ? 'block' : 'none';
         
-        // Hide loader when searching
+        const allGamesLoaded = ((currentPage - 1) * GAMES_PER_PAGE) >= TOTAL_GAMES;
         loader.style.display = searchTerm ? 'none' : (allGamesLoaded ? 'none' : 'flex');
     };
 
     const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isLoading && !allGamesLoaded && searchInput.value.trim() === '') {
-            fetchGames(currentPage);
+        if (entries[0].isIntersecting && !isLoading && searchInput.value.trim() === '') {
+            loadMoreGames();
         }
     }, { rootMargin: '0px 0px 400px 0px' });
 
@@ -121,5 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(loader);
 
     // Initial load
-    fetchGames(currentPage);
+    renderFeaturedGames(GAMES_DATA);
+    loadMoreGames();
 });
